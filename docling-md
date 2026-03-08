@@ -5,4 +5,5 @@ docling "$@" \
     --to md \
     --pipeline vlm \
     --image-export-mode placeholder \
+    --verbose \
     --output .
