@@ -3,8 +3,6 @@ source .venv/bin/activate
 cd ~/Documents/CLI\ Tools/Docliing/
 docling "$@" \
     --to md \
-    --pipeline vlm \
-    --vlm-model qwen \
     --image-export-mode placeholder \
     --verbose \
     --output .
