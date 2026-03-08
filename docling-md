@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+source .venv/bin/activate
+cd ~/Documents/CLI\ Tools/Docliing/
+docling "$@" \
+    --to md \
+    --pipeline vlm \
+    --image-export-mode placeholder \
+    --output .
