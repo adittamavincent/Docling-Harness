@@ -320,8 +320,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "-o", "--output-dir",
-        default=".",
-        help="Directory to save generated markdown files (default: current directory)",
+        default=None,
+        help="Directory to save generated markdown files (default: same directory as the input document)",
     )
     parser.add_argument(
         "--device",
@@ -335,12 +335,17 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     input_path = Path(args.document_path)
-    output_dir = Path(args.output_dir)
     device = args.device
 
     if not input_path.exists():
         console.print(f"Error: Document not found: '{input_path}'", style="error")
         sys.exit(1)
+
+    # If no output directory is provided, save in the same directory as the input document
+    if args.output_dir:
+        output_dir = Path(args.output_dir)
+    else:
+        output_dir = input_path.parent
 
     if not output_dir.exists():
         output_dir.mkdir(parents=True, exist_ok=True)

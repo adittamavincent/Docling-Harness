@@ -116,7 +116,7 @@ uv run docling-harness input.pdf --table-mode native --no-ocr
 | `--ocr` / `--no-ocr` | — | `--ocr` | Enable or disable Optical Character Recognition (OCR) for scanned sheets |
 | `--export-images` | — | `False` | Extract charts, figures, and table snapshots as visual PNG assets |
 | `--debug-docling-tables` | — | `False` | Output a separate debug markdown showing Docling-detected tables |
-| `-o`, `--output-dir` | *directory* | `.` | Target directory to save markdown outputs and assets |
+| `-o`, `--output-dir` | *directory* | *None* | Target directory to save markdown outputs. If not specified, saves in the same directory as the source document |
 | `--device` | `auto`, `cpu`, `cuda`, `mps` | `auto` | Accelerator backend. Defaults to `cpu` on macOS to bypass PyTorch MPS `float64` issues |
 
 ---
