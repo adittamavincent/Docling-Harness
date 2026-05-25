@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# Resolve the absolute directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Check if uv is installed on the system
+if command -v uv &> /dev/null; then
+    # Execute the console script defined in pyproject.toml via uv run
+    exec uv run --project "$SCRIPT_DIR" docling-harness "$@"
+else
+    # Fallback: run the python script using the local virtualenv python if available
+    if [ -f "$SCRIPT_DIR/.venv/bin/python" ]; then
+        exec "$SCRIPT_DIR/.venv/bin/python" "$SCRIPT_DIR/docling_md.py" "$@"
+    else
+        # Fallback to system python3
+        exec python3 "$SCRIPT_DIR/docling_md.py" "$@"
+    fi
+fi

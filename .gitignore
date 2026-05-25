@@ -1,0 +1,33 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints
+.ruff_cache/
+
+# Packaging and Build files
+*.egg-info/
+docling_harness.egg-info/
+docliing.egg-info/
+build/
+dist/
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE and Editor Files
+.vscode/
+.idea/
+.DS_Store
+
+# Output Documents & Temporary generated files
+*.md
+!README.md
+!walkthrough.md
+!task.md
+!implementation_plan.md
+*_assets/
