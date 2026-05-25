@@ -68,8 +68,17 @@ You can run the converter using **`uv run`** or via the included **`docling-harn
 
 ### 1. Unified Command (Recommended)
 
-Run the included `./docling-harness` script directly from the workspace. It automatically resolves dependencies, handles execution via `uv run`, and functions perfectly from any working directory:
+Run the included `./docling-harness` script directly from the workspace. It automatically resolves dependencies, handles execution via `uv run`, and functions perfectly from any working directory.
 
+> [!NOTE]
+> If you encounter a `Permission denied` error when executing the script for the first time, make it executable:
+> ```bash
+> chmod +x docling-harness
+> # Or, if required by system configuration:
+> sudo chmod +x docling-harness
+> ```
+
+To convert a document, simply run:
 ```bash
 ./docling-harness path/to/document.pdf [options]
 ```
