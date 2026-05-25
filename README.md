@@ -78,6 +78,11 @@ Run the included `./docling-harness` script directly from the workspace. It auto
 > sudo chmod +x docling-harness
 > ```
 
+> [!TIP]
+> **Apple Silicon macOS Compatibility:**
+> Docling's standard layout parsing uses deep learning models that are incompatible with PyTorch's MPS double-precision (`float64`) operations.
+> To bypass this layout model crash out-of-the-box, **Docling Harness automatically defaults its accelerator `--device` to `cpu` on macOS** when set to `auto` (the default). If you explicitly specify `--device mps` and encounter a `TypeError`, the tool will cleanly catch the exception and instruct you to run with `--device cpu`.
+
 To convert a document, simply run:
 ```bash
 ./docling-harness path/to/document.pdf [options]
@@ -108,6 +113,7 @@ uv run docling-harness input.pdf --table-mode native --no-ocr
 | `--export-images` | — | `False` | Extract charts, figures, and table snapshots as visual PNG assets |
 | `--debug-docling-tables` | — | `False` | Output a separate debug markdown showing Docling-detected tables |
 | `-o`, `--output-dir` | *directory* | `.` | Target directory to save markdown outputs and assets |
+| `--device` | `auto`, `cpu`, `cuda`, `mps` | `auto` | Accelerator backend. Defaults to `cpu` on macOS to bypass PyTorch MPS `float64` issues |
 
 ---
 

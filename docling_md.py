@@ -59,6 +59,7 @@ try:
     from docling.datamodel.pipeline_options import PdfPipelineOptions
     from docling.document_converter import DocumentConverter, PdfFormatOption
     from docling_core.types.doc.document import DoclingDocument
+    from docling.datamodel.accelerator_options import AcceleratorDevice, AcceleratorOptions
 except ImportError as e:
     console.print(f"Error: Required dependency docling is not installed: {e}", style="error")
     sys.exit(1)
@@ -74,7 +75,8 @@ except ImportError:
 def build_docling_converter(
     enable_table_structure: bool = True,
     enable_ocr: bool = True,
-    export_images: bool = False
+    export_images: bool = False,
+    device: str = "auto"
 ) -> DocumentConverter:
     """Builds a configured DocumentConverter instance."""
     pdf_pipeline_options = PdfPipelineOptions()
@@ -85,6 +87,16 @@ def build_docling_converter(
         pdf_pipeline_options.generate_picture_images = True
         pdf_pipeline_options.generate_page_images = True
         pdf_pipeline_options.images_scale = 2.0
+    
+    # Map device parameter to AcceleratorDevice enum
+    device_map = {
+        "auto": AcceleratorDevice.AUTO,
+        "cpu": AcceleratorDevice.CPU,
+        "cuda": AcceleratorDevice.CUDA,
+        "mps": AcceleratorDevice.MPS,
+    }
+    device_enum = device_map.get(device.lower(), AcceleratorDevice.AUTO)
+    pdf_pipeline_options.accelerator_options = AcceleratorOptions(device=device_enum)
     
     # We only customize the PDF pipeline options; other formats use built-in parsers
     format_options = {
@@ -188,7 +200,8 @@ def convert_document(
     flavor: str = "lattice",
     enable_ocr: bool = True,
     export_images: bool = False,
-    debug_docling_tables: bool = False
+    debug_docling_tables: bool = False,
+    device: str = "auto"
 ) -> Tuple[Path, Optional[Path]]:
     """Converts a document to Markdown with premium options and table layout models."""
     start_time = time.time()
@@ -211,7 +224,8 @@ def convert_document(
     converter = build_docling_converter(
         enable_table_structure=do_docling_tables,
         enable_ocr=enable_ocr,
-        export_images=export_images
+        export_images=export_images,
+        device=device
     )
     
     # 2. Convert via Docling
@@ -254,7 +268,7 @@ def convert_document(
             debug_file = export_docling_table_debug(result.document, input_path, flavor=flavor)
         else:
             with console.status("Generating Docling table debug view..."):
-                debug_converter = build_docling_converter(enable_table_structure=True, enable_ocr=enable_ocr)
+                debug_converter = build_docling_converter(enable_table_structure=True, enable_ocr=enable_ocr, device=device)
                 debug_result = debug_converter.convert(str(input_path))
                 debug_file = export_docling_table_debug(debug_result.document, input_path, flavor=flavor)
                 
@@ -309,6 +323,12 @@ def parse_args() -> argparse.Namespace:
         default=".",
         help="Directory to save generated markdown files (default: current directory)",
     )
+    parser.add_argument(
+        "--device",
+        choices=["auto", "cpu", "cuda", "mps"],
+        default="auto",
+        help="Hardware accelerator device to use (default: auto)",
+    )
     return parser.parse_args()
 
 
@@ -316,6 +336,7 @@ def main() -> None:
     args = parse_args()
     input_path = Path(args.document_path)
     output_dir = Path(args.output_dir)
+    device = args.device
 
     if not input_path.exists():
         console.print(f"Error: Document not found: '{input_path}'", style="error")
@@ -323,6 +344,14 @@ def main() -> None:
 
     if not output_dir.exists():
         output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Automatically default to CPU on macOS to avoid the layout model's MPS float64/double-precision crash
+    if sys.platform == "darwin" and device.lower() == "auto":
+        console.print(
+            "macOS detected: Automatically defaulting accelerator device to 'cpu' to prevent MPS double-precision (float64) compatibility crash.",
+            style="warning"
+        )
+        device = "cpu"
 
     try:
         output_file, debug_file = convert_document(
@@ -332,7 +361,8 @@ def main() -> None:
             flavor=args.flavor,
             enable_ocr=args.enable_ocr,
             export_images=args.export_images,
-            debug_docling_tables=args.debug_docling_tables
+            debug_docling_tables=args.debug_docling_tables,
+            device=device
         )
         
         console.print(f"Successfully saved output markdown: [success]{output_file.resolve()}[/success]")
@@ -340,7 +370,18 @@ def main() -> None:
             console.print(f"Saved Docling table debug comparison: [info]{debug_file.resolve()}[/info]")
             
     except Exception as e:
-        console.print(f"Conversion failed due to an unexpected error: {e}", style="error")
+        error_msg = str(e)
+        if "MPS" in error_msg and ("float64" in error_msg or "float32" in error_msg):
+            console.print(
+                "\n[bold red]Error: PyTorch MPS framework double-precision (float64) compatibility bug encountered.[/bold red]",
+                style="error"
+            )
+            console.print(
+                "Please run the command again using the CPU backend by specifying: [accent]--device cpu[/accent]\n",
+                style="info"
+            )
+        else:
+            console.print(f"Conversion failed due to an unexpected error: {e}", style="error")
         import traceback
         traceback.print_exc()
         sys.exit(1)
