@@ -285,9 +285,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("document_path", help="Path to the input document (PDF, Word, PPTX, XLSX, HTML, or Image)")
     parser.add_argument(
         "--table-mode",
-        choices=["native", "camelot", "hybrid"],
+        choices=["native", "camelot", "hybrid", "none"],
         default="native",
-        help="Table extraction mode: 'native' (Docling TableFormer), 'camelot' (PDF Camelot grids), 'hybrid' (both) (default: native)",
+        help="Table extraction mode: 'native' (Docling TableFormer), 'camelot' (PDF Camelot grids), 'hybrid' (both), 'none' (omit tables) (default: native)",
     )
     parser.add_argument(
         "--flavor",

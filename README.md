@@ -25,7 +25,7 @@ By leveraging the structural layout analysis of Docling together with the progra
 
 ## Table Extraction Modes
 
-Docling Harness offers three distinct strategies for extracting tables from your files:
+Docling Harness offers four distinct strategies for extracting tables from your files:
 
 1. **`native` (Docling TableFormer)** (Default)
    - Uses Docling's advanced deep learning-based visual structure recognizer.
@@ -38,6 +38,10 @@ Docling Harness offers three distinct strategies for extracting tables from your
 3. **`hybrid` (Combined Engine)**
    - Uses Docling to parse the main document body structure (headings, lists, paragraphs) and appends high-fidelity table grids extracted by **Camelot** in a dedicated reference section.
    - **Best for:** Documents where both visual body flow and exact programmatic spreadsheet data are required.
+
+4. **`none` (Omit Tables)**
+   - Disables all table parsing and ignores both Docling TableFormer and Camelot table structures.
+   - **Best for:** Documents where tables are irrelevant or should be skipped to keep the output clean and speed up processing.
 
 ---
 
@@ -107,7 +111,7 @@ uv run docling-harness input.pdf --table-mode native --no-ocr
 | Argument | Choices | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `document_path` | *filepath* | *(Required)* | Path to the source file (PDF, Word, PPTX, Images, etc.) |
-| `--table-mode` | `native`, `camelot`, `hybrid` | `native` | Selection strategy for table parser engines |
+| `--table-mode` | `native`, `camelot`, `hybrid`, `none` | `native` | Selection strategy for table parser engines (`none` disables all table parsing and omits tables) |
 | `--flavor` | `lattice`, `stream` | `lattice` | Camelot parser flavor (lattice matches grid lines, stream uses whitespace) |
 | `--ocr` / `--no-ocr` | — | `--ocr` | Enable or disable Optical Character Recognition (OCR) for scanned sheets |
 | `--export-images` | — | `False` | Extract charts, figures, and table snapshots as visual PNG assets |
